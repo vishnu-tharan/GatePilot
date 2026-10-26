@@ -77,6 +77,8 @@ Use these mode names with `Start-GatePilot.ps1`. Keep the ignored `.docker/secre
 | `docker`, `scripts`                | Optional local Docker setup.                                                 |
 | `docs/screenshots`                 | Current desktop and mobile web screenshots.                                  |
 
+The main helper names describe their jobs: `requireSession` checks sign-in, `allowRoles` checks permissions, and `getDepartmentFilter` limits department data. Screen actions such as `saveProfile` and `updateRecord` call the API directly. Shared visual rules live in `frontend/src/ui.jsx` as `styles`; page-specific styles stay with their screen.
+
 ## Checks
 
 ```powershell

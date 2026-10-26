@@ -1,5 +1,5 @@
 const { OrganizationSettings, User, VehicleRecord } = require("./models");
-const v = require("./validation");
+const validation = require("./validation");
 
 const defaults = {
   name: "Sample Campus",
@@ -35,43 +35,45 @@ async function saveSettings(settings) {
     return await settings.save();
   } catch (error) {
     if (error.name === "VersionError")
-      v.fail("Settings changed in another session. Refresh and try again.", 409);
+      validation.fail("Settings changed in another session. Refresh and try again.", 409);
     throw error;
   }
 }
 
 async function addOption(kind, body) {
-  const name = v.text(body, "name", true, 60).replace(/\s+/g, " ");
-  if (name.length < 2) v.fail("Use a name with at least two characters");
+  const name = validation.text(body, "name", true, 60).replace(/\s+/g, " ");
+  if (name.length < 2) validation.fail("Use a name with at least two characters");
   const settings = await getSettings();
   if (settings[kind].some((item) => item.name.toLowerCase() === name.toLowerCase())) {
-    v.fail("This name already exists. Reactivate the existing option if needed.", 409);
+    validation.fail("This name already exists. Reactivate the existing option if needed.", 409);
   }
-  if (settings[kind].length >= 1000) v.fail("This organization has reached the 1,000-option limit");
+  if (settings[kind].length >= 1000)
+    validation.fail("This organization has reached the 1,000-option limit");
   settings[kind].push({ name, active: true });
   return saveSettings(settings);
 }
 
 async function setOptionActive(kind, id, active) {
-  if (typeof active !== "boolean") v.fail("Invalid active status");
+  if (typeof active !== "boolean") validation.fail("Invalid active status");
   const settings = await getSettings();
   const item = settings[kind].id(id);
-  if (!item) v.fail("Setting not found", 404);
+  if (!item) validation.fail("Setting not found", 404);
   if (item.active === active) return settings;
   if (!active) {
-    if (activeNames(settings, kind).length <= 1) v.fail("Keep at least one active option", 409);
+    if (activeNames(settings, kind).length <= 1)
+      validation.fail("Keep at least one active option", 409);
     const assignment =
       kind === "gates"
         ? { gate: item.name, role: "security" }
         : { department: item.name, role: "admin" };
     if (await User.exists({ ...assignment, active: { $ne: false } })) {
-      v.fail("Reassign or disable the accounts using this option before retiring it", 409);
+      validation.fail("Reassign or disable the accounts using this option before retiring it", 409);
     }
     if (
       kind === "departments" &&
       (await VehicleRecord.exists({ department: item.name, outTime: null }))
     )
-      v.fail("Close open visits before retiring this department", 409);
+      validation.fail("Close open visits before retiring this department", 409);
   }
   item.active = active;
   return saveSettings(settings);

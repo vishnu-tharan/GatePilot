@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../api";
 export function useLoad(path, onResult) {
-  const [data, setData] = useState(null),
-    [error, setError] = useState(""),
-    [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const requestId = useRef(0);
   const reload = useCallback(async () => {
     const id = ++requestId.current;
@@ -26,7 +26,7 @@ export function useLoad(path, onResult) {
     Promise.resolve().then(() => {
       if (active) reload();
     });
-    // This ref is a request generation counter, not a DOM node. Invalidate pending responses.
+    // Ignore older responses after the user changes pages or filters.
     return () => {
       active = false;
       // eslint-disable-next-line react-hooks/exhaustive-deps

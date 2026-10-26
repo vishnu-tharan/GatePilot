@@ -1,16 +1,16 @@
 const { User, Session } = require("../models");
-const { verifyToken, hash } = require("../../middleware/authMiddleware");
+const { requireSession, hashSessionToken } = require("../../middleware/authMiddleware");
 const { randomBytes } = require("node:crypto");
-const { wrap, publicUser, cookieOptions } = require("../http");
+const { asyncHandler, toPublicUser, getSessionCookieOptions } = require("../http");
 const bcrypt = require("bcryptjs");
-const v = require("../validation");
+const validation = require("../validation");
 function registerAuthenticationRoutes(app, { loginLimiter }) {
   app.post(
     "/user/login",
     loginLimiter,
-    wrap(async (req, res) => {
-      const email = v.text(req.body, "email", true, 254).toLowerCase(),
-        password = v.secret(req.body, "password");
+    asyncHandler(async (req, res) => {
+      const email = validation.text(req.body, "email", true, 254).toLowerCase();
+      const password = validation.secret(req.body, "password");
       const user = await User.findOne({
         email,
       }).select("+password");
@@ -63,15 +63,15 @@ function registerAuthenticationRoutes(app, { loginLimiter }) {
       );
       const token = randomBytes(32).toString("hex");
       await Session.create({
-        tokenHash: hash(token),
+        tokenHash: hashSessionToken(token),
         userId: user._id,
         version: user.sessionVersion || 0,
         expiresAt: new Date(Date.now() + 8 * 60 * 60_000),
       });
       req.user = user;
-      res.cookie("gatepilot_session", token, cookieOptions());
+      res.cookie("gatepilot_session", token, getSessionCookieOptions());
       res.json({
-        user: publicUser(user),
+        user: toPublicUser(user),
         ...(!req.headers.origin
           ? {
               token,
@@ -80,33 +80,34 @@ function registerAuthenticationRoutes(app, { loginLimiter }) {
       });
     }),
   );
-  app.get("/user/me", verifyToken, (req, res) => res.json(publicUser(req.user)));
+  app.get("/user/me", requireSession, (req, res) => res.json(toPublicUser(req.user)));
   app.put(
     "/user/me",
-    verifyToken,
-    wrap(async (req, res) => {
+    requireSession,
+    asyncHandler(async (req, res) => {
       const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-          name: v.text(req.body, "name", true),
+          name: validation.text(req.body, "name", true),
         },
         {
           returnDocument: "after",
         },
       );
-      res.json(publicUser(user));
+      res.json(toPublicUser(user));
     }),
   );
   app.post(
     "/user/password",
-    verifyToken,
+    requireSession,
     loginLimiter,
-    wrap(async (req, res) => {
-      const user = await User.findById(req.user._id).select("+password"),
-        current = v.secret(req.body, "currentPassword"),
-        password = v.password(req.body.newPassword);
-      if (!(await bcrypt.compare(current, user.password))) v.fail("Current password is incorrect");
-      if (current === password) v.fail("Choose a different password");
+    asyncHandler(async (req, res) => {
+      const user = await User.findById(req.user._id).select("+password");
+      const current = validation.secret(req.body, "currentPassword");
+      const password = validation.password(req.body.newPassword);
+      if (!(await bcrypt.compare(current, user.password)))
+        validation.fail("Current password is incorrect");
+      if (current === password) validation.fail("Choose a different password");
       await User.updateOne(
         {
           _id: user._id,
@@ -124,7 +125,7 @@ function registerAuthenticationRoutes(app, { loginLimiter }) {
         userId: user._id,
       });
       res.clearCookie("gatepilot_session", {
-        ...cookieOptions(),
+        ...getSessionCookieOptions(),
         maxAge: undefined,
       });
       res.json({
@@ -134,13 +135,13 @@ function registerAuthenticationRoutes(app, { loginLimiter }) {
   );
   app.post(
     "/user/logout",
-    verifyToken,
-    wrap(async (req, res) => {
+    requireSession,
+    asyncHandler(async (req, res) => {
       await Session.deleteOne({
         _id: req.session._id,
       });
       res.clearCookie("gatepilot_session", {
-        ...cookieOptions(),
+        ...getSessionCookieOptions(),
         maxAge: undefined,
       });
       res.json({

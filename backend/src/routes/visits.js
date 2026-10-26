@@ -1,22 +1,22 @@
 const { VehicleRecord } = require("../models");
-const { verifyToken, roles } = require("../../middleware/authMiddleware");
+const { requireSession, allowRoles } = require("../../middleware/authMiddleware");
 const { randomUUID } = require("node:crypto");
-const { wrap, scope } = require("../http");
-const v = require("../validation");
+const { asyncHandler, getDepartmentFilter } = require("../http");
+const validation = require("../validation");
 function registerVisitsRoutes(app) {
   app.get(
     "/vehicleRecord",
-    verifyToken,
-    wrap(async (req, res) => {
-      const page = Math.max(1, Math.min(Math.floor(Number(req.query.page)) || 1, 100000)),
-        query = scope(req);
+    requireSession,
+    asyncHandler(async (req, res) => {
+      const page = Math.max(1, Math.min(Math.floor(Number(req.query.page)) || 1, 100000));
+      const query = getDepartmentFilter(req);
       if (req.query.status === "inside") query.outTime = null;
       if (req.query.status === "pending") {
         query.approvalStatus = "Pending Approval";
         query.outTime = null;
       }
       if (req.query.gate !== undefined) {
-        query.entryGate = v.choice(
+        query.entryGate = validation.choice(
           req.query,
           "gate",
           req.settings.gates.map((item) => item.name),
@@ -53,22 +53,22 @@ function registerVisitsRoutes(app) {
   );
   app.post(
     "/vehicleRecord",
-    roles("security"),
-    wrap(async (req, res) => {
+    allowRoles("security"),
+    asyncHandler(async (req, res) => {
       if (!req.gates.includes(req.user.gate))
-        v.fail("Ask an administrator to assign your gate", 403);
-      const equipment = v.text(req.body, "carriedEquipment", false, 1000);
+        validation.fail("Ask an administrator to assign your gate", 403);
+      const equipment = validation.text(req.body, "carriedEquipment", false, 1000);
       const record = await VehicleRecord.create({
         passId: randomUUID(),
         inTime: new Date().toISOString(),
         outTime: null,
-        vehicleNumber: v.plate(req.body),
-        driverName: v.text(req.body, "driverName", true),
-        driverIdentity: v.text(req.body, "driverIdentity", true, 30),
-        driverPhone: v.text(req.body, "driverPhone", true, 30),
-        department: v.choice(req.body, "department", req.departments),
+        vehicleNumber: validation.plate(req.body),
+        driverName: validation.text(req.body, "driverName", true),
+        driverIdentity: validation.text(req.body, "driverIdentity", true, 30),
+        driverPhone: validation.text(req.body, "driverPhone", true, 30),
+        department: validation.choice(req.body, "department", req.departments),
         carriedEquipment: equipment,
-        entryNotes: v.text(req.body, "entryNotes", false, 1000),
+        entryNotes: validation.text(req.body, "entryNotes", false, 1000),
         approvalStatus: equipment ? "Pending Approval" : "Approved",
         entryGate: req.user.gate,
         createdBy: String(req.user._id),
@@ -78,12 +78,12 @@ function registerVisitsRoutes(app) {
   );
   app.put(
     "/vehicleRecord/status/:passId",
-    roles("admin", "superadmin"),
-    wrap(async (req, res) => {
-      const status = v.choice(req.body, "status", ["Approved", "Rejected"]);
+    allowRoles("admin", "superadmin"),
+    asyncHandler(async (req, res) => {
+      const status = validation.choice(req.body, "status", ["Approved", "Rejected"]);
       const record = await VehicleRecord.findOneAndUpdate(
         {
-          ...scope(req),
+          ...getDepartmentFilter(req),
           passId: req.params.passId,
           approvalStatus: "Pending Approval",
           outTime: null,
@@ -97,15 +97,15 @@ function registerVisitsRoutes(app) {
           returnDocument: "after",
         },
       );
-      if (!record) v.fail("Request unavailable or already reviewed", 409);
+      if (!record) validation.fail("Request unavailable or already reviewed", 409);
       res.json(record);
     }),
   );
   app.put(
     "/vehicleRecord/resubmit/:passId",
-    roles("security"),
-    wrap(async (req, res) => {
-      const notes = v.text(req.body, "entryNotes", true, 1000);
+    allowRoles("security"),
+    asyncHandler(async (req, res) => {
+      const notes = validation.text(req.body, "entryNotes", true, 1000);
       const record = await VehicleRecord.findOneAndUpdate(
         {
           passId: req.params.passId,
@@ -122,31 +122,31 @@ function registerVisitsRoutes(app) {
           returnDocument: "after",
         },
       );
-      if (!record) v.fail("Rejected active request not found", 409);
+      if (!record) validation.fail("Rejected active request not found", 409);
       res.json(record);
     }),
   );
   app.put(
     "/vehicleRecord/:vehicleNumber",
-    roles("security"),
-    wrap(async (req, res) => {
-      if (!req.gates.includes(req.user.gate)) v.fail("No gate assigned", 403);
-      const exitEquipment = v.text(req.body, "exitEquipment", false, 1000),
-        exitNotes = v.text(req.body, "exitNotes", false, 1000),
-        passId = v.text(req.body, "passId", true),
-        number = v.plate({
-          vehicleNumber: req.params.vehicleNumber,
-        });
+    allowRoles("security"),
+    asyncHandler(async (req, res) => {
+      if (!req.gates.includes(req.user.gate)) validation.fail("No gate assigned", 403);
+      const exitEquipment = validation.text(req.body, "exitEquipment", false, 1000);
+      const exitNotes = validation.text(req.body, "exitNotes", false, 1000);
+      const passId = validation.text(req.body, "passId", true);
+      const number = validation.plate({
+        vehicleNumber: req.params.vehicleNumber,
+      });
       const existing = await VehicleRecord.findOne({
         passId,
         vehicleNumber: number,
         outTime: null,
       });
-      if (!existing) v.fail("Visit unavailable or already closed. Refresh the list.", 409);
+      if (!existing) validation.fail("Visit unavailable or already closed. Refresh the list.", 409);
       if (existing.approvalStatus !== "Approved")
-        v.fail("Equipment approval is required before exit", 409);
+        validation.fail("Equipment approval is required before exit", 409);
       if (existing.carriedEquipment && !exitEquipment)
-        v.fail("Record the equipment verification before exit");
+        validation.fail("Record the equipment verification before exit");
       const record = await VehicleRecord.findOneAndUpdate(
         {
           _id: existing._id,
@@ -163,7 +163,7 @@ function registerVisitsRoutes(app) {
           returnDocument: "after",
         },
       );
-      if (!record) v.fail("Visit already closed", 409);
+      if (!record) validation.fail("Visit already closed", 409);
       res.json(record);
     }),
   );

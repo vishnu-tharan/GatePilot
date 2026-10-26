@@ -1,67 +1,63 @@
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { api } from "../api";
-import { Button, Field, Message, s } from "../ui";
+import { Button, Field, Message, styles } from "../ui";
 import { Heading } from "../components/ScreenElements";
+
 export function Profile({ user, onUpdate, onPasswordChange }) {
-  const [form, setForm] = useState({
-      name: user.name,
-    }),
-    [currentPassword, setCurrentPassword] = useState(""),
-    [newPassword, setNewPassword] = useState(""),
-    [confirm, setConfirm] = useState(""),
-    [busy, setBusy] = useState(false),
-    [message, setMessage] = useState(""),
-    [error, setError] = useState("");
-  async function run(fn) {
+  const [displayName, setDisplayName] = useState(user.name || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function saveProfile() {
     setBusy(true);
     setError("");
     setMessage("");
     try {
-      await fn();
-    } catch (e) {
-      setError(e.message);
+      const updatedUser = await api("/user/me", "PUT", { name: displayName });
+      onUpdate(updatedUser);
+      setMessage("Your profile has been updated.");
+    } catch (error) {
+      setError(error.message);
     } finally {
       setBusy(false);
     }
   }
+
+  async function changePassword() {
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      await api("/user/password", "POST", { currentPassword, newPassword });
+      await onPasswordChange();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const canChangePassword =
+    currentPassword && newPassword.length >= 12 && newPassword === confirmPassword;
+
   return (
     <>
       <Heading title="My profile" subtitle="Make it yours. Keep your account protected." />
       <Message text={error} error />
       <Message text={message} />
-      <View
-        style={[
-          s.row,
-          {
-            alignItems: "flex-start",
-          },
-        ]}
-      >
-        <View
-          style={[
-            s.card,
-            {
-              flex: 1,
-              minWidth: 260,
-            },
-          ]}
-        >
-          <Text style={s.title}>Personal details</Text>
-          <Text style={s.muted}>
+      <View style={[styles.row, profileStyles.columns]}>
+        <View style={[styles.card, profileStyles.panel]}>
+          <Text style={styles.title}>Personal details</Text>
+          <Text style={styles.muted}>
             {user.email} · {user.role}
           </Text>
-          <Field
-            label="Display name *"
-            value={form.name}
-            onChange={(value) =>
-              setForm({
-                ...form,
-                name: value,
-              })
-            }
-          />
-          <Text style={s.muted}>
+          <Field label="Display name *" value={displayName} onChange={setDisplayName} />
+          <Text style={styles.muted}>
             Your email, role, department and gate assignments are managed by organization
             administration.
           </Text>
@@ -69,27 +65,13 @@ export function Profile({ user, onUpdate, onPasswordChange }) {
             title="Save profile"
             icon="check"
             busy={busy}
-            disabled={!form.name.trim()}
-            onPress={() =>
-              run(async () => {
-                const updated = await api("/user/me", "PUT", form);
-                onUpdate(updated);
-                setMessage("Your profile has been updated.");
-              })
-            }
+            disabled={!displayName.trim()}
+            onPress={saveProfile}
           />
         </View>
-        <View
-          style={[
-            s.card,
-            {
-              flex: 1,
-              minWidth: 260,
-            },
-          ]}
-        >
-          <Text style={s.title}>Change password</Text>
-          <Text style={s.muted}>
+        <View style={[styles.card, profileStyles.panel]}>
+          <Text style={styles.title}>Change password</Text>
+          <Text style={styles.muted}>
             Use 12+ characters with uppercase, lowercase and a number. Changing your password signs
             out every session.
           </Text>
@@ -100,24 +82,26 @@ export function Profile({ user, onUpdate, onPasswordChange }) {
             password
           />
           <Field label="New password" value={newPassword} onChange={setNewPassword} password />
-          <Field label="Confirm new password" value={confirm} onChange={setConfirm} password />
+          <Field
+            label="Confirm new password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            password
+          />
           <Button
             title="Update password & sign out"
             icon="lock"
             busy={busy}
-            disabled={!currentPassword || newPassword.length < 12 || newPassword !== confirm}
-            onPress={() =>
-              run(async () => {
-                await api("/user/password", "POST", {
-                  currentPassword,
-                  newPassword,
-                });
-                await onPasswordChange();
-              })
-            }
+            disabled={!canChangePassword}
+            onPress={changePassword}
           />
         </View>
       </View>
     </>
   );
 }
+
+const profileStyles = StyleSheet.create({
+  columns: { alignItems: "flex-start" },
+  panel: { flex: 1, minWidth: 260 },
+});

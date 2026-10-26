@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import { api } from "../api";
 import { useOrganization } from "../organization";
-import { Button, Dialog, Field, Message, s } from "../ui";
+import { Button, Dialog, Field, Message, styles } from "../ui";
 
 export function SettingsScreen() {
   const { settings, refresh } = useOrganization();
@@ -32,17 +32,17 @@ export function SettingsScreen() {
   return (
     <>
       <View style={{ gap: 8 }}>
-        <Text style={s.title}>Organization settings</Text>
-        <Text style={s.muted}>
+        <Text style={styles.title}>Organization settings</Text>
+        <Text style={styles.muted}>
           Adapt GatePilot to a campus, office, factory, or other workplace.
         </Text>
       </View>
       <Message text={error} error />
       <Message text={message} />
-      <View style={s.card}>
-        <Text style={s.title}>Workspace identity</Text>
+      <View style={styles.card}>
+        <Text style={styles.title}>Workspace identity</Text>
         <Field label="Organization name" value={name} onChange={setName} />
-        <Text style={s.muted}>
+        <Text style={styles.muted}>
           For a public demonstration, use a fictional organization and synthetic records.
         </Text>
         <Button
@@ -55,11 +55,11 @@ export function SettingsScreen() {
         />
       </View>
       {["gates", "departments"].map((kind) => (
-        <View key={kind} style={s.card}>
-          <Text style={s.title}>
+        <View key={kind} style={styles.card}>
+          <Text style={styles.title}>
             {kind === "gates" ? "Gates & entry points" : "Departments & teams"}
           </Text>
-          <Text style={s.muted}>
+          <Text style={styles.muted}>
             Add options as your organization grows. Retired options remain in historical records and
             can be reactivated.
           </Text>
@@ -87,11 +87,11 @@ export function SettingsScreen() {
           {settings[kind].map((item) => (
             <View
               key={item._id}
-              style={[s.row, { justifyContent: "space-between", paddingVertical: 10 }]}
+              style={[styles.row, { justifyContent: "space-between", paddingVertical: 10 }]}
             >
               <View style={{ flex: 1 }}>
-                <Text style={s.text}>{item.name}</Text>
-                <Text style={s.muted}>{item.active ? "Active" : "Retired"}</Text>
+                <Text style={styles.text}>{item.name}</Text>
+                <Text style={styles.muted}>{item.active ? "Active" : "Retired"}</Text>
               </View>
               <Button
                 title={item.active ? "Retire" : "Reactivate"}
@@ -115,7 +115,7 @@ export function SettingsScreen() {
       ))}
       {retire && (
         <Dialog title={`Retire ${retire.item.name}?`} onClose={() => !busy && setRetire(null)}>
-          <Text style={s.text}>
+          <Text style={styles.text}>
             This option will stop appearing in new assignments and entries. Historical records
             remain unchanged. Reassign linked accounts first; departments also need their open
             visits closed.

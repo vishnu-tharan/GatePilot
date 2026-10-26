@@ -1,13 +1,13 @@
 const { VehicleRecord } = require("../models");
-const { verifyToken } = require("../../middleware/authMiddleware");
-const { wrap, scope } = require("../http");
+const { requireSession } = require("../../middleware/authMiddleware");
+const { asyncHandler, getDepartmentFilter } = require("../http");
 function registerDashboardRoutes(app) {
   app.get(
     "/dashboard",
-    verifyToken,
-    wrap(async (req, res) => {
-      const filter = scope(req),
-        start = new Date();
+    requireSession,
+    asyncHandler(async (req, res) => {
+      const filter = getDepartmentFilter(req);
+      const start = new Date();
       start.setUTCHours(0, 0, 0, 0);
       const [inside, pending, today, recent, gateCounts] = await Promise.all([
         VehicleRecord.countDocuments({

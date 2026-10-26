@@ -3,7 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { mongoose } = require("./models");
-const { wrap } = require("./http");
+const { asyncHandler } = require("./http");
 const { getSettings, activeNames } = require("./settings");
 const { registerSettingsRoutes } = require("./routes/settings");
 const { registerAuthenticationRoutes } = require("./routes/authentication");
@@ -62,7 +62,7 @@ function createApp() {
     }),
   );
   app.use(
-    wrap(async (req, res, next) => {
+    asyncHandler(async (req, res, next) => {
       req.settings = await getSettings();
       req.gates = activeNames(req.settings, "gates");
       req.departments = activeNames(req.settings, "departments");
@@ -71,7 +71,7 @@ function createApp() {
   );
   app.get(
     "/workspace",
-    wrap(async (req, res) =>
+    asyncHandler(async (req, res) =>
       res.json({
         name: req.settings.name,
       }),

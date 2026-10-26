@@ -1,24 +1,40 @@
-const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-const publicUser = (u) => ({
-  _id: u._id,
-  name: u.name,
-  email: u.email,
-  role: u.role,
-  gate: u.gate,
-  department: u.department,
-  active: u.active !== false,
-});
-const scope = (req) =>
-  req.user.role === "admin"
-    ? {
-        department: req.user.department || "__unassigned__",
-      }
-    : {};
-const cookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-  path: "/",
-  maxAge: 8 * 60 * 60 * 1000,
-});
-module.exports = { wrap, publicUser, scope, cookieOptions };
+function asyncHandler(handler) {
+  return async function handleRequest(req, res, next) {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+function toPublicUser(user) {
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    gate: user.gate,
+    department: user.department,
+    active: user.active !== false,
+  };
+}
+
+function getDepartmentFilter(req) {
+  if (req.user.role === "admin") {
+    return { department: req.user.department || "__unassigned__" };
+  }
+  return {};
+}
+
+function getSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 8 * 60 * 60 * 1000,
+  };
+}
+
+module.exports = { asyncHandler, toPublicUser, getDepartmentFilter, getSessionCookieOptions };

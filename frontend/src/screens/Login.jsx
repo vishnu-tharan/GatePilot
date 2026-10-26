@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { api, saveToken } from "../api";
-import { Button, Field, Message, colors, s } from "../ui";
+import { Button, Field, Message, colors, styles } from "../ui";
 import { branding } from "../branding.mjs";
 import { BrandMark, PrototypeNotice } from "../brand";
 import { useLoad } from "../hooks/useLoad";
@@ -17,10 +17,10 @@ export function Login({ onLogin }) {
   const { width } = useWindowDimensions();
   const organization = useLoad("/workspace");
   const organizationName = organization.data?.name || branding.defaultOrganization;
-  const [email, setEmail] = useState(""),
-    [password, setPassword] = useState(""),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   async function login() {
     setBusy(true);
     setError("");
@@ -61,7 +61,7 @@ export function Login({ onLogin }) {
             minHeight: width > 900 ? 680 : 270,
           }}
         >
-          <View style={s.row}>
+          <View style={styles.row}>
             <BrandMark size={56} />
             <View>
               <Text
@@ -138,7 +138,7 @@ export function Login({ onLogin }) {
                 ["check-circle", "Review equipment before departure."],
                 ["smartphone", "A shared workspace on any screen."],
               ].map(([icon, label]) => (
-                <View key={label} style={s.row}>
+                <View key={label} style={styles.row}>
                   <Feather name={icon} size={18} color="#9ef0d3" />
                   <Text
                     style={{
@@ -198,7 +198,7 @@ export function Login({ onLogin }) {
               >
                 Open your workspace
               </Text>
-              <Text style={s.muted}>Sign in to explore your access-management workspace.</Text>
+              <Text style={styles.muted}>Sign in to explore your access-management workspace.</Text>
             </View>
             <PrototypeNotice />
             <View
@@ -206,10 +206,10 @@ export function Login({ onLogin }) {
                 gap: 9,
               }}
             >
-              <Text style={s.label}>Choose a demo workspace</Text>
+              <Text style={styles.label}>Choose a demo workspace</Text>
               <View
                 style={[
-                  s.row,
+                  styles.row,
                   {
                     gap: 8,
                   },
@@ -254,7 +254,7 @@ export function Login({ onLogin }) {
             />
             <Text
               style={[
-                s.muted,
+                styles.muted,
                 {
                   textAlign: "center",
                   fontSize: 12,
@@ -263,10 +263,10 @@ export function Login({ onLogin }) {
             >
               Use a demo account to explore arrivals and departures with fictional visitor details.
             </Text>
-            <View style={s.divider} />
+            <View style={styles.divider} />
             <Text
               style={[
-                s.muted,
+                styles.muted,
                 {
                   fontSize: 11,
                   textAlign: "center",

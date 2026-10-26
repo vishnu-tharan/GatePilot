@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { api } from "../api";
-import { Button, Choices, Dialog, Field, Message, colors, s } from "../ui";
+import { Button, Choices, Dialog, Field, Message, colors, styles } from "../ui";
 import { useOrganization } from "../organization";
 import { useLoad } from "../hooks/useLoad";
 import { Heading, LoadState } from "../components/ScreenElements";
 export function Accounts() {
   const { gates, departments } = useOrganization();
 
-  const state = useLoad("/user");
-  const [form, setForm] = useState(null),
-    [disable, setDisable] = useState(null),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+  const accountsState = useLoad("/user");
+  const [form, setForm] = useState(null);
+  const [accountToDisable, setAccountToDisable] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   return (
     <>
       <Heading
@@ -36,9 +36,9 @@ export function Accounts() {
           />
         }
       />
-      <LoadState state={state} />
-      <View style={s.card}>
-        {state.data?.map((person) => (
+      <LoadState state={accountsState} />
+      <View style={styles.card}>
+        {accountsState.data?.map((person) => (
           <View
             key={person._id}
             style={{
@@ -50,7 +50,7 @@ export function Accounts() {
           >
             <View
               style={[
-                s.row,
+                styles.row,
                 {
                   justifyContent: "space-between",
                 },
@@ -59,7 +59,7 @@ export function Accounts() {
               <View>
                 <Text
                   style={[
-                    s.text,
+                    styles.text,
                     {
                       fontWeight: "700",
                     },
@@ -67,13 +67,13 @@ export function Accounts() {
                 >
                   {person.name}
                 </Text>
-                <Text style={s.muted}>{person.email}</Text>
-                <Text style={s.muted}>
+                <Text style={styles.muted}>{person.email}</Text>
+                <Text style={styles.muted}>
                   {person.role} · {person.gate || person.department || "All departments"}
                 </Text>
               </View>
               {person.role !== "superadmin" && (
-                <View style={s.row}>
+                <View style={styles.row}>
                   <Button
                     title="Edit"
                     secondary
@@ -90,7 +90,7 @@ export function Accounts() {
                     danger
                     small
                     onPress={() => {
-                      setDisable(person);
+                      setAccountToDisable(person);
                       setError("");
                     }}
                   />
@@ -140,7 +140,7 @@ export function Accounts() {
                   })
                 }
               />
-              <Text style={s.muted}>
+              <Text style={styles.muted}>
                 At least 12 characters, with uppercase, lowercase and a number. Share through an
                 approved private channel.
               </Text>
@@ -196,7 +196,7 @@ export function Accounts() {
                   form,
                 );
                 setForm(null);
-                await state.reload();
+                await accountsState.reload();
               } catch (e) {
                 setError(e.message);
               } finally {
@@ -206,11 +206,11 @@ export function Accounts() {
           />
         </Dialog>
       )}
-      {disable && (
-        <Dialog title="Disable account?" onClose={() => !busy && setDisable(null)}>
-          <Text style={s.text}>
-            {disable.name} will immediately lose access, including on devices already signed in.
-            Existing records remain available.
+      {accountToDisable && (
+        <Dialog title="Disable account?" onClose={() => !busy && setAccountToDisable(null)}>
+          <Text style={styles.text}>
+            {accountToDisable.name} will immediately lose access, including on devices already
+            signed in. Existing records remain available.
           </Text>
           <Message text={error} error />
           <Button
@@ -220,9 +220,9 @@ export function Accounts() {
             onPress={async () => {
               setBusy(true);
               try {
-                await api(`/user/${disable._id}`, "DELETE");
-                setDisable(null);
-                await state.reload();
+                await api(`/user/${accountToDisable._id}`, "DELETE");
+                setAccountToDisable(null);
+                await accountsState.reload();
               } catch (e) {
                 setError(e.message);
               } finally {

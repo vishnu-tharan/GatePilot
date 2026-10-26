@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { api, restoreToken, saveToken, setUnauthorizedHandler } from "./src/api";
-import { colors, s } from "./src/ui";
+import { colors, styles } from "./src/ui";
 import { OrganizationProvider } from "./src/organization";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Login } from "./src/screens/Login";
 import { Workspace } from "./src/Workspace";
 function GatePilot() {
-  const [user, setUser] = useState(null),
-    [ready, setReady] = useState(false),
-    [tab, setTab] = useState("Overview"),
-    [error, setError] = useState("");
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
+  const [tab, setTab] = useState("Overview");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -54,7 +54,7 @@ function GatePilot() {
         }}
       >
         <ActivityIndicator color={colors.primary} />
-        <Text style={s.muted}>Opening GatePilot…</Text>
+        <Text style={styles.muted}>Opening GatePilot…</Text>
       </View>
     );
   if (!user)

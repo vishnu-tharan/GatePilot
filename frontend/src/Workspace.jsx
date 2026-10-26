@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { saveToken } from "./api";
-import { Button, Message, colors, s } from "./ui";
+import { Button, Message, colors, styles } from "./ui";
 import { useOrganization } from "./organization";
 import { BrandMark, PrototypeNotice } from "./brand";
 import { SettingsScreen } from "./screens/Settings";
@@ -25,7 +25,7 @@ export function Workspace({ user, setUser, tab, setTab, error, setError, logout 
     return (
       <View style={{ flex: 1, justifyContent: "center", padding: 24, gap: 16 }}>
         <ActivityIndicator color={colors.primary} />
-        <Text style={s.muted}>Loading workspace settings…</Text>
+        <Text style={styles.muted}>Loading workspace settings…</Text>
         <Message text={settingsError} error />
         {!!settingsError && <Button title="Retry settings" secondary onPress={refresh} />}
       </View>
@@ -102,7 +102,7 @@ export function Workspace({ user, setUser, tab, setTab, error, setError, logout 
         >
           <View
             style={[
-              s.row,
+              styles.row,
               {
                 paddingVertical: 13,
               },
@@ -190,14 +190,14 @@ export function Workspace({ user, setUser, tab, setTab, error, setError, logout 
         >
           <View
             style={[
-              s.row,
+              styles.row,
               {
                 paddingHorizontal: 18,
                 justifyContent: "space-between",
               },
             ]}
           >
-            <View style={s.row}>
+            <View style={styles.row}>
               <BrandMark size={30} />
               <View>
                 <Text
@@ -275,7 +275,7 @@ export function Workspace({ user, setUser, tab, setTab, error, setError, logout 
             accessibilityRole="button"
             accessibilityLabel="Open my profile"
             onPress={() => navigate("My profile")}
-            style={s.row}
+            style={styles.row}
           >
             <View
               style={{

@@ -14,9 +14,13 @@ const request = require("supertest");
 const bcrypt = require("bcryptjs");
 const { mongoose, User, VehicleRecord, Session, OrganizationSettings } = require("../src/models");
 const { createApp } = require("../src/app");
-const { hash } = require("../middleware/authMiddleware");
+const { hashSessionToken } = require("../middleware/authMiddleware");
 const { randomBytes } = require("node:crypto");
-let mongo, app, passwordHash, users, tokens;
+let mongo;
+let app;
+let passwordHash;
+let users;
+let tokens;
 before(async () => {
   mongo = await MongoMemoryServer.create();
   await mongoose.connect(mongo.getUri());
@@ -53,7 +57,7 @@ beforeEach(async () => {
     });
     tokens[key] = randomBytes(32).toString("hex");
     await Session.create({
-      tokenHash: hash(tokens[key]),
+      tokenHash: hashSessionToken(tokens[key]),
       userId: users[key]._id,
       version: 0,
       expiresAt: new Date(Date.now() + 3600000),
@@ -124,7 +128,7 @@ test("native login token is hashed in the database and logout revokes it", async
   assert.equal(res.status, 200);
   assert.ok(
     await Session.exists({
-      tokenHash: hash(res.body.token),
+      tokenHash: hashSessionToken(res.body.token),
     }),
   );
   await request(app)

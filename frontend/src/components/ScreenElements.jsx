@@ -1,11 +1,11 @@
 import { ActivityIndicator, Text, View } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
-import { Badge, Button, Message, colors, date, s } from "../ui";
+import { Badge, Button, Message, colors, date, styles } from "../ui";
 export function Heading({ title, subtitle, action }) {
   return (
     <View
       style={[
-        s.row,
+        styles.row,
         {
           justifyContent: "space-between",
           marginBottom: 2,
@@ -21,7 +21,7 @@ export function Heading({ title, subtitle, action }) {
       >
         <Text
           style={[
-            s.title,
+            styles.title,
             {
               fontSize: 28,
             },
@@ -29,7 +29,7 @@ export function Heading({ title, subtitle, action }) {
         >
           {title}
         </Text>
-        <Text style={s.muted}>{subtitle}</Text>
+        <Text style={styles.muted}>{subtitle}</Text>
       </View>
       {action}
     </View>
@@ -56,7 +56,7 @@ export function RecordCard({ item, onOpen }) {
     >
       <View
         style={[
-          s.row,
+          styles.row,
           {
             justifyContent: "space-between",
           },
@@ -64,7 +64,7 @@ export function RecordCard({ item, onOpen }) {
       >
         <View
           style={[
-            s.row,
+            styles.row,
             {
               flex: 1,
               minWidth: 180,
@@ -83,7 +83,7 @@ export function RecordCard({ item, onOpen }) {
           <View>
             <Text
               style={[
-                s.text,
+                styles.text,
                 {
                   fontWeight: "700",
                   letterSpacing: 0.5,
@@ -92,7 +92,7 @@ export function RecordCard({ item, onOpen }) {
             >
               {item.vehicleNumber}
             </Text>
-            <Text style={s.muted}>
+            <Text style={styles.muted}>
               {item.driverName} · {item.department}
             </Text>
           </View>
@@ -102,7 +102,7 @@ export function RecordCard({ item, onOpen }) {
       </View>
       <Text
         style={[
-          s.muted,
+          styles.muted,
           {
             fontSize: 11,
           },

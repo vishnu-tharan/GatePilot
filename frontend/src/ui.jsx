@@ -20,7 +20,7 @@ export const colors = {
   amber: "#946016",
   red: "#b14355",
 };
-export const s = StyleSheet.create({
+export const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -81,7 +81,7 @@ export function Button({ title, onPress, icon, secondary, danger, disabled, busy
       disabled={disabled || busy}
       onPress={onPress}
       style={({ pressed }) => [
-        s.button,
+        styles.button,
         {
           backgroundColor: bg,
           opacity: disabled || busy ? 0.5 : pressed ? 0.8 : 1,
@@ -119,7 +119,7 @@ export function Field({
   const [visible, setVisible] = useState(false);
   return (
     <View style={{ gap: 0, flexGrow: 1 }}>
-      <Text style={s.label}>{label}</Text>
+      <Text style={styles.label}>{label}</Text>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <TextInput
           accessibilityLabel={label}
@@ -134,7 +134,7 @@ export function Field({
           autoCorrect={!password}
           editable={editable}
           style={[
-            s.input,
+            styles.input,
             {
               flex: 1,
               ...(multiline ? { minHeight: 90, textAlignVertical: "top" } : {}),
@@ -159,8 +159,8 @@ export function Field({
 export function Choices({ label, options, value, onChange }) {
   return (
     <View>
-      <Text style={s.label}>{label}</Text>
-      <View style={[s.row, { gap: 8 }]}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={[styles.row, { gap: 8 }]}>
         {options.map((option) => (
           <Pressable
             key={option}
@@ -192,14 +192,14 @@ export function Choices({ label, options, value, onChange }) {
   );
 }
 export function Badge({ status }) {
-  const tone =
-    status === "Rejected"
-      ? colors.red
-      : status === "Pending Approval"
-        ? colors.amber
-        : status === "Exited"
-          ? colors.muted
-          : colors.primary;
+  let tone = colors.primary;
+  if (status === "Rejected") {
+    tone = colors.red;
+  } else if (status === "Pending Approval") {
+    tone = colors.amber;
+  } else if (status === "Exited") {
+    tone = colors.muted;
+  }
   return (
     <View
       style={{
@@ -222,8 +222,8 @@ export function Empty({
   return (
     <View style={{ alignItems: "center", padding: 34, gap: 9 }}>
       <Feather name={icon} size={28} color={colors.muted} />
-      <Text style={[s.text, { fontWeight: "700" }]}>{title}</Text>
-      <Text style={[s.muted, { textAlign: "center" }]}>{detail}</Text>
+      <Text style={[styles.text, { fontWeight: "700" }]}>{title}</Text>
+      <Text style={[styles.muted, { textAlign: "center" }]}>{detail}</Text>
     </View>
   );
 }
@@ -239,9 +239,11 @@ export function Dialog({ title, children, onClose }) {
           padding: 18,
         }}
       >
-        <View style={[s.card, { width: "100%", maxWidth: 620, maxHeight: "92%", padding: 22 }]}>
-          <View style={[s.row, { justifyContent: "space-between" }]}>
-            <Text style={[s.title, { flex: 1 }]}>{title}</Text>
+        <View
+          style={[styles.card, { width: "100%", maxWidth: 620, maxHeight: "92%", padding: 22 }]}
+        >
+          <View style={[styles.row, { justifyContent: "space-between" }]}>
+            <Text style={[styles.title, { flex: 1 }]}>{title}</Text>
             <Button title="Close" secondary onPress={onClose} />
           </View>
           <ScrollView contentContainerStyle={{ gap: 18 }} keyboardShouldPersistTaps="handled">

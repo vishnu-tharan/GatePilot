@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { api } from "../api";
-import { Button, Choices, Field, Message, s } from "../ui";
+import { Button, Choices, Field, Message, styles } from "../ui";
 import { useOrganization } from "../organization";
 import { Heading } from "../components/ScreenElements";
 export function Entry({ user }) {
@@ -17,11 +17,11 @@ export function Entry({ user }) {
   };
 
   const [form, setForm] = useState({
-      ...blankEntry,
-    }),
-    [message, setMessage] = useState(""),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+    ...blankEntry,
+  });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const change = (key, value) =>
     setForm((old) => ({
       ...old,
@@ -52,16 +52,16 @@ export function Entry({ user }) {
       <Message text={message} />
       <View
         style={[
-          s.card,
+          styles.card,
           {
             maxWidth: 850,
           },
         ]}
       >
-        <Text style={s.title}>Vehicle & visitor details</Text>
+        <Text style={styles.title}>Vehicle & visitor details</Text>
         <View
           style={[
-            s.row,
+            styles.row,
             {
               alignItems: "flex-start",
             },
@@ -125,7 +125,7 @@ export function Entry({ user }) {
           onChange={(value) => change("entryNotes", value)}
           multiline
         />
-        <Text style={s.muted}>
+        <Text style={styles.muted}>
           Equipment entries require department approval. Entry time and your gate are recorded
           automatically.
         </Text>

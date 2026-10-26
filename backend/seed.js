@@ -4,8 +4,8 @@ const bcrypt = require("bcryptjs");
 const { mongoose, User } = require("./src/models");
 const { password, email } = require("./src/validation");
 async function seed() {
-  const address = email({ email: process.env.ADMIN_EMAIL }),
-    secret = password(process.env.ADMIN_PASSWORD);
+  const address = email({ email: process.env.ADMIN_EMAIL });
+  const secret = password(process.env.ADMIN_PASSWORD);
   await mongoose.connect(databaseUri());
   if (await User.exists({ email: address }))
     throw new Error("Account already exists; no data changed.");

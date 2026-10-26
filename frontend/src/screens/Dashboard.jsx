@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
-import { Button, Empty, colors, s } from "../ui";
+import { Button, Empty, colors, styles } from "../ui";
 import { useOrganization } from "../organization";
 import { useLoad } from "../hooks/useLoad";
 import { Heading, LoadState, RecordCard } from "../components/ScreenElements";
@@ -34,7 +34,7 @@ export function Dashboard({ user, navigate }) {
           borderColor: "#dce3f0",
         }}
       >
-        <View style={s.row}>
+        <View style={styles.row}>
           <Feather name="sun" size={19} color={colors.primary} />
           <Text
             style={{
@@ -49,7 +49,7 @@ export function Dashboard({ user, navigate }) {
         </View>
         <Text
           style={[
-            s.title,
+            styles.title,
             {
               maxWidth: 550,
             },
@@ -59,7 +59,7 @@ export function Dashboard({ user, navigate }) {
         </Text>
         <Text
           style={[
-            s.muted,
+            styles.muted,
             {
               maxWidth: 550,
             },
@@ -68,7 +68,7 @@ export function Dashboard({ user, navigate }) {
           Follow activity at each gate, review equipment requests, and keep arrivals and departures
           moving with clear records.
         </Text>
-        <View style={s.row}>
+        <View style={styles.row}>
           <Button
             title={user.role === "security" ? "Record an arrival" : "Review approvals"}
             icon={user.role === "security" ? "plus" : "check-square"}
@@ -83,7 +83,7 @@ export function Dashboard({ user, navigate }) {
       </View>
       <View
         style={[
-          s.row,
+          styles.row,
           {
             alignItems: "stretch",
           },
@@ -97,7 +97,7 @@ export function Dashboard({ user, navigate }) {
           <View
             key={label}
             style={[
-              s.card,
+              styles.card,
               {
                 flex: 1,
                 minWidth: 200,
@@ -106,13 +106,13 @@ export function Dashboard({ user, navigate }) {
           >
             <View
               style={[
-                s.row,
+                styles.row,
                 {
                   justifyContent: "space-between",
                 },
               ]}
             >
-              <Text style={s.muted}>{label}</Text>
+              <Text style={styles.muted}>{label}</Text>
               <Feather name={icon} size={18} color={colors.primary} />
             </View>
             <Text
@@ -127,7 +127,7 @@ export function Dashboard({ user, navigate }) {
             </Text>
             <Text
               style={[
-                s.muted,
+                styles.muted,
                 {
                   fontSize: 11,
                 },
@@ -140,7 +140,7 @@ export function Dashboard({ user, navigate }) {
       </View>
       <View
         style={[
-          s.row,
+          styles.row,
           {
             alignItems: "stretch",
           },
@@ -148,7 +148,7 @@ export function Dashboard({ user, navigate }) {
       >
         <View
           style={[
-            s.card,
+            styles.card,
             {
               flex: 2,
               minWidth: 270,
@@ -157,16 +157,16 @@ export function Dashboard({ user, navigate }) {
         >
           <View
             style={[
-              s.row,
+              styles.row,
               {
                 justifyContent: "space-between",
               },
             ]}
           >
-            <Text style={s.title}>Recent movements</Text>
+            <Text style={styles.title}>Recent movements</Text>
             <Text
               style={[
-                s.muted,
+                styles.muted,
                 {
                   fontSize: 11,
                 },
@@ -186,15 +186,15 @@ export function Dashboard({ user, navigate }) {
         </View>
         <View
           style={[
-            s.card,
+            styles.card,
             {
               flex: 1,
               minWidth: 250,
             },
           ]}
         >
-          <Text style={s.title}>Around the gates</Text>
-          <Text style={s.muted}>Active visits by entry gate</Text>
+          <Text style={styles.title}>Around the gates</Text>
+          <Text style={styles.muted}>Active visits by entry gate</Text>
           {state.data?.gates.map((item, index) => (
             <View
               key={item.gate}
@@ -207,13 +207,13 @@ export function Dashboard({ user, navigate }) {
             >
               <View
                 style={[
-                  s.row,
+                  styles.row,
                   {
                     justifyContent: "space-between",
                   },
                 ]}
               >
-                <View style={s.row}>
+                <View style={styles.row}>
                   <Text
                     style={{
                       fontSize: 11,
@@ -224,7 +224,7 @@ export function Dashboard({ user, navigate }) {
                   </Text>
                   <Text
                     style={[
-                      s.text,
+                      styles.text,
                       {
                         fontWeight: "600",
                       },
@@ -235,7 +235,7 @@ export function Dashboard({ user, navigate }) {
                 </View>
                 <Text
                   style={[
-                    s.text,
+                    styles.text,
                     {
                       fontWeight: "700",
                     },
@@ -264,7 +264,7 @@ export function Dashboard({ user, navigate }) {
           ))}
           <Text
             style={[
-              s.muted,
+              styles.muted,
               {
                 fontSize: 11,
               },
