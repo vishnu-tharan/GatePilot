@@ -1,0 +1,47 @@
+{
+  "name": "gatepilot",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "expo start --clear",
+    "dev": "expo start --web --clear",
+    "web": "expo start --web --clear",
+    "android": "expo start --android --clear",
+    "ios": "expo start --ios --clear",
+    "build": "expo export --platform web --clear",
+    "build:mobile": "expo export --platform android --platform ios --output-dir dist-mobile --clear",
+    "lint": "eslint App.jsx src index.js",
+    "test": "node --test test/*.test.mjs",
+    "postinstall": "node scripts/patch-dependencies.cjs",
+    "format": "prettier --write ../backend ../docker/*.js ../compose.yaml App.jsx src scripts test app.json package.json ../README.md ../SECURITY.md --ignore-path ../.prettierignore",
+    "format:check": "prettier --check ../backend ../docker/*.js ../compose.yaml App.jsx src scripts test app.json package.json ../README.md ../SECURITY.md --ignore-path ../.prettierignore"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~55.0.12",
+    "@expo/vector-icons": "^15.0.2",
+    "expo": "~55.0.31",
+    "expo-secure-store": "~55.0.18",
+    "expo-status-bar": "~55.0.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.10",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-web": "~0.21.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "~19.2.10",
+    "@types/react-dom": "~19.2.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.10"
+  },
+  "main": "index.js",
+  "overrides": {
+    "js-yaml": "^4.3.2",
+    "xcode": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

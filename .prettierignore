@@ -1,0 +1,9 @@
+**/node_modules/**
+**/package-lock.json
+**/.env*
+**/.expo/**
+**/dist/**
+**/dist-mobile/**
+.npm-cache/**
+.test-mongodb/**
+*.zip
