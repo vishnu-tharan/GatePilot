@@ -1,0 +1,16 @@
+**/node_modules
+**/.env
+**/.env.*
+**/.expo
+**/dist
+**/dist-mobile
+**/.npm-cache
+**/.test-mongodb
+**/.git
+**/.agents
+**/.codex
+**/coverage
+**/test-results
+**/*.log
+**/*.zip
+.docker

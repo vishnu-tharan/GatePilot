@@ -1,0 +1,96 @@
+name: gatepilot
+
+x-api: &api
+  image: gatepilot-api:local
+  build:
+    context: ./backend
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  environment:
+    NODE_ENV: development
+    PORT: "5000"
+    MONGO_HOST: mongo:27017
+    MONGO_DATABASE: gatepilotDB
+    MONGO_USER: gatepilot
+    MONGO_PASSWORD_FILE: /run/secrets/database_password
+    WEB_ORIGINS: http://localhost:${GATEPILOT_PORT:-8080},http://127.0.0.1:${GATEPILOT_PORT:-8080}
+    TRUST_PROXY: "1"
+
+services:
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: gatepilot-root
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/database_root_password
+      MONGO_INITDB_DATABASE: gatepilotDB
+    secrets:
+      - database_root_password
+      - database_password
+    volumes:
+      - mongodb-data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/gatepilot.js:ro
+      - ./docker/mongo-healthcheck.js:/opt/gatepilot-healthcheck.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--file", "/opt/gatepilot-healthcheck.js"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 12
+
+  setup:
+    <<: *api
+    command: ["node", "scripts/setup-local.js"]
+    restart: "no"
+    healthcheck:
+      disable: true
+    secrets:
+      - database_password
+      - starter_password
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  api:
+    <<: *api
+    restart: unless-stopped
+    secrets:
+      - database_password
+    depends_on:
+      mongo:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+
+  web:
+    image: gatepilot-web:local
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports:
+      - "127.0.0.1:${GATEPILOT_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+secrets:
+  database_root_password:
+    file: ./.docker/secrets/database-root-password
+  database_password:
+    file: ./.docker/secrets/database-password
+  starter_password:
+    file: ./.docker/secrets/starter-password
+
+volumes:
+  mongodb-data:
+    name: gatepilot-mongodb-data
