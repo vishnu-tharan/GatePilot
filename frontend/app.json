@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "GatePilot",
+    "slug": "gatepilot",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "icon": "./public/gatepilot-icon.png",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "test.sampleorganization.gatepilot"
+    },
+    "android": {
+      "package": "test.sampleorganization.gatepilot"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./public/gatepilot-icon.png"
+    },
+    "plugins": ["expo-secure-store"]
+  }
+}
